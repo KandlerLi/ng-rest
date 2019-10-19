@@ -1,5 +1,5 @@
-import { Injectable, Inject, Optional } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Injectable, Inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { transformAndValidate } from 'class-transformer-validator';
 import { Observable, ReplaySubject } from 'rxjs';
 import { flatMap, share, map } from 'rxjs/operators';
@@ -9,9 +9,10 @@ import { NgRestConfigService } from './ng-rest-config.service';
 
 @Injectable()
 export class NgRestService {
+  readonly defaultOptions = { responseType: 'text' };
 
   constructor(private http: HttpClient,
-      @Inject('ng-rest-config') @Optional() private restConfig?: NgRestConfigService) { }
+      @Inject('ng-rest-config') private restConfig?: NgRestConfigService) { }
 
   private subjects: { [url: string]: ReplaySubject<any> } = {};
 
@@ -23,7 +24,7 @@ export class NgRestService {
           force = true;
         }
         if (force) {
-          this.http.get(actionUrl, { headers: urlMap.headers })
+          this.http.get(actionUrl, { headers: undefined })
             .subscribe((response: T) => {
               this.subjects[actionUrl].next(response);
             }, error => {
@@ -57,21 +58,21 @@ export class NgRestService {
 
   public postData(urlMap: UrlMap, newData, ids?: Map<string, string>): Observable<any> {
     return this.getActionUrl(urlMap, ids).pipe(
-      flatMap(actionUrl => this.http.post(actionUrl, newData, { headers: urlMap.headers, responseType: 'text' })),
+      flatMap(actionUrl => this.http.post(actionUrl, newData, urlMap.options)),
       share()
     );
   }
 
   public putData(urlMap: UrlMap, newData, ids?: Map<string, string>): Observable<any> {
     return this.getActionUrl(urlMap, ids).pipe(
-      flatMap(actionUrl => this.http.put(actionUrl, newData, { headers: urlMap.headers, responseType: 'text' })),
+      flatMap(actionUrl => this.http.put(actionUrl, newData, urlMap.options)),
       share()
     );
   }
 
   public deleteData(urlMap: UrlMap, ids?: Map<string, string>): Observable<any> {
     return this.getActionUrl(urlMap, ids).pipe(
-      flatMap(actionUrl => this.http.delete(actionUrl, { headers: urlMap.headers, responseType: 'text' })),
+      flatMap(actionUrl => this.http.delete(actionUrl, urlMap.options)),
       share()
     );
   }
@@ -92,6 +93,10 @@ export class NgRestService {
       .replace('{finOrVin}', this.parameterStore.lastParams.fin);*/
     }));
   }
+
+  /*private getOptions(options: any ): any {
+    return {...this.defaultOptions, ...options };
+  }*/
 
   /*private applyQueryParams(url: string, queryString: string) {
     const urlWithQuery = url + '?' + this.parameterStore.lastParams.getQueryString();
