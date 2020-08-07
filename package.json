@@ -22,7 +22,7 @@
     "@angular/platform-browser": "~7.0.0",
     "@angular/platform-browser-dynamic": "~7.0.0",
     "@angular/router": "~7.0.0",
-    "class-transformer": "^0.1.9",
+    "class-transformer": "^0.3.1",
     "class-transformer-validator": "^0.6.0",
     "class-validator": "https://github.com/servrox/class-validator/tarball/build",
     "core-js": "^2.5.4",
